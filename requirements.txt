@@ -1,0 +1,3 @@
+PyQt5==5.15.9
+pyqt_color_picker==0.0.20
+pyusb==1.2.1
