@@ -10,4 +10,8 @@ python3 gui.py
 ```
 
 # TODO:
-- 
+- Add DPI settings
+- Add mouse parameter settings
+- Add poling rate settings
+- Add macros
+- Add profiles
