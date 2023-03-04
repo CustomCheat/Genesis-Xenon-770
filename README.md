@@ -6,8 +6,9 @@ This is unofficial software for the Genesis Xenon 770 mouse for GNU/Linux. For n
 pip install -r requirements.txt
 ```
 ```
-python3 gui.py
+sudo python3 gui.py
 ```
+## Make sure to run as root! It cannot attach to the mouse without root!
 
 # TODO:
 - Add DPI settings
