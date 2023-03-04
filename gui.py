@@ -32,12 +32,13 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtCore import *
 from PyQt5.QtGui import * 
 from PyQt5 import QtGui, QtCore
-
+import json
 from pyqt_color_picker import ColorPickerDialog
 
 import main
 class Window(QWidget):
     tabWidgets = []
+    settings = json.loads(open("settings.json", "r").read())
     def closeEvent(self, ev):
         print("Detaching from mouse")
         main.detach_mouse()
@@ -86,6 +87,10 @@ class Window(QWidget):
             widget.setParent(None)
         self.tabWidgets = []
         self.setFixedSize(270, 110)
+    def writeSettings(self):
+        with open("settings.json", "w") as write_file:
+            json.dump(self.settings, write_file)
+
     def macroTabUI(self):
 
         macroTab = QWidget()
@@ -122,7 +127,7 @@ class Window(QWidget):
         speedSlider = QSlider(Qt.Horizontal)
         speedSlider.setMaximum(3)
         speedSlider.setMinimum(1)
-        speedSlider.setValue(2)
+        speedSlider.setValue(self.settings["settings"][modeID]["speed"])
         speedSlider.valueChanged.connect(lambda i: self.handleSpeedChange(i, modeID))
         self.addTabWidget(speedSlider, RGBTab)
         label = QLabel("Direction:")
@@ -142,7 +147,7 @@ class Window(QWidget):
         brightnessSlider = QSlider(Qt.Horizontal)
         brightnessSlider.setMaximum(4)
         brightnessSlider.setMinimum(1)
-        brightnessSlider.setValue(2)
+        brightnessSlider.setValue(self.settings["settings"][modeID]["brightness"])
         brightnessSlider.valueChanged.connect(lambda i: self.handleBrightnessChange(i, modeID))
         label = QLabel("Brightness:")
         self.addTabWidget(label, RGBTab)
@@ -156,7 +161,7 @@ class Window(QWidget):
         speedSlider = QSlider(Qt.Horizontal)
         speedSlider.setMaximum(3)
         speedSlider.setMinimum(1)
-        speedSlider.setValue(2)
+        speedSlider.setValue(self.settings["settings"][modeID]["speed"])
         speedSlider.valueChanged.connect(lambda i: self.handleSpeedChange(i, modeID))
         self.addTabWidget(speedSlider, RGBTab)
         # Create 7 buttons with the following: 'X Color' to set the colors
@@ -172,7 +177,7 @@ class Window(QWidget):
         speedSlider = QSlider(Qt.Horizontal)
         speedSlider.setMaximum(3)
         speedSlider.setMinimum(1)
-        speedSlider.setValue(2)
+        speedSlider.setValue(self.settings["settings"][modeID]["speed"])
         speedSlider.valueChanged.connect(lambda i: self.handleSpeedChange(i, modeID))
         self.addTabWidget(speedSlider, RGBTab)
         main.setMode(main.getMemory(True), modeID)
@@ -183,7 +188,7 @@ class Window(QWidget):
         speedSlider = QSlider(Qt.Horizontal)
         speedSlider.setMaximum(3)
         speedSlider.setMinimum(1)
-        speedSlider.setValue(2)
+        speedSlider.setValue(self.settings["settings"][modeID]["speed"])
         speedSlider.valueChanged.connect(lambda i: self.handleSpeedChange(i, modeID))
         self.addTabWidget(speedSlider, RGBTab)
         main.setMode(main.getMemory(True), modeID)
@@ -210,7 +215,7 @@ class Window(QWidget):
         speedSlider = QSlider(Qt.Horizontal)
         speedSlider.setMaximum(3)
         speedSlider.setMinimum(1)
-        speedSlider.setValue(2)
+        speedSlider.setValue(self.settings["settings"][modeID]["speed"])
         speedSlider.valueChanged.connect(lambda i: self.handleSpeedChange(i, modeID))
         self.addTabWidget(speedSlider, RGBTab)
         main.setMode(main.getMemory(True), modeID)
@@ -221,7 +226,7 @@ class Window(QWidget):
         speedSlider = QSlider(Qt.Horizontal)
         speedSlider.setMaximum(3)
         speedSlider.setMinimum(1)
-        speedSlider.setValue(2)
+        speedSlider.setValue(self.settings["settings"][modeID]["speed"])
         speedSlider.valueChanged.connect(lambda i: self.handleSpeedChange(i, modeID))
         self.addTabWidget(speedSlider, RGBTab)
         main.setMode(main.getMemory(True), modeID)
@@ -257,14 +262,20 @@ class Window(QWidget):
     def handleSpeedChange(self, speed, effectID):
         print("Changing effect speed EFFECT ID: " + str(effectID) + " SPEED: " + str(speed))
         main.setModeSpeed(main.getMemory(True), speed)
+        self.settings["settings"][effectID]["speed"] = speed
+        self.writeSettings()
+
     def handleBrightnessChange(self, brightness, effectID):
         print("Changing brightness EFFECT ID: " + str(effectID) + " SPEED: " + str(brightness))
         main.setSteadyModeBrightness(main.getMemory(True), brightness)
+        self.settings["settings"][effectID]["brightness"] = speed
+        self.writeSettings()
 
     def handleSetDirection(self,direction):
         print("Changing prismo effect direction to: " + str(direction))
         main.setPrismoEffectModeDirection(main.getMemory(True), direction)
-
+        self.settings["settings"][1]["direction"] = 'left' if direction == 1 else 'right'
+        self.writeSettings()
 
 
 
