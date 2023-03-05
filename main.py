@@ -7,6 +7,7 @@ import usb.util
 import re
 import binascii
 import random
+import math
 VID = 0x258A
 PID = 0x0027
 
@@ -16,7 +17,6 @@ wIndex = None
 
 def main():
     attach_mouse()
-    set_color_to_memory(getMemory(True), "004DCF", 6)
     detach_mouse()
 defaultMapping = '04120050000000001101000011020000110400004101000041020000110100001102000011020000110100001102000011020000110100001102000011020000500100005001000050010000500100005001000050010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000'
 def test():
@@ -97,6 +97,45 @@ def set_color_to_memory(memory, color, dpi):
         else:
             newMem += memory[i]
     writeToMemory(newMem)
+
+def setDpi(memory, DPI, DPIid):
+    if DPIid < 0 or DPIid > 6:
+        return
+    if(DPI % 100 != 0):
+        print("Invalid DPI")
+        return
+    newMem = list(memory)
+    firstPos = 26 + ((DPIid - 1) * 2)
+    secondPos = firstPos + 1
+    hexDPI = str(hex(math.floor(DPI / 100) - 1)).replace("0x", "")
+    if(DPI == 10200):
+        hexDPI = "45"
+    valid = False
+    if(len(hexDPI) == 1):
+        newMem[firstPos] = "0"
+        newMem[secondPos] = hexDPI
+        valid = True
+    if(len(hexDPI) == 2):
+        newMem[firstPos] = hexDPI[0]
+        newMem[secondPos] = hexDPI[1]
+        valid = True
+    if not valid: 
+        print("Err: invalid hex DPI!")
+        return
+    
+    newMem =  ''.join(map(str, newMem))
+    writeToMemory(newMem)
+
+def getDPI(memory, DPIid):
+    if DPIid < 0 or DPIid > 6:
+        return
+    memList = list(memory)
+    firstPos = 26 + ((DPIid - 1) * 2)
+    secondPos = firstPos + 1
+    DPIhex = memList[firstPos] + memList[secondPos]
+    DPIint = int(DPIhex, 16) * 100 + 100
+    return DPIint
+
 def writeToMemory(memory):
     dev.ctrl_transfer(0x21, 0x09, 0x0305, 1, binascii.unhexlify('051100000000'))
     dev.ctrl_transfer(0x21, 0x09, 0x0304, 1, binascii.unhexlify(memory))
@@ -104,7 +143,7 @@ def writeToMemory(memory):
 # 0 = LED OFF; 1 = PRISMO effect; 2 = Steady; 3 = Breathing; 4 = Colorful Tail; 5 = Neon; 6 = Colorful Steady; 7 = Flicker; 8 = Stars Twinkle; 9 = Wave
 def setMode(memory, modeNum):
     if modeNum < 0 or modeNum > 9:
-        return;
+        return
     newMem = list(memory)
     newMem[107] = modeNum
     newMem =  ''.join(map(str, newMem))
@@ -191,6 +230,8 @@ def setColorfulSteadyModeColor(memory, color, colornum):
         else:
             newMem += memory[i]
     writeToMemory(newMem)
+
+
 
 def getMemory(senadble):
     dev.ctrl_transfer(0x21, 0x09, 0x0305, 1, binascii.unhexlify('051100000000'))

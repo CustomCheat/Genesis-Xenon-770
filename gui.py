@@ -25,7 +25,9 @@ from PyQt5.QtWidgets import (
 
     QSizePolicy,
 
-    QGridLayout
+    QGridLayout,
+
+    QLineEdit
 
 )
 # THIS PROGRAM NEEDS TO RUN AS ROOT!
@@ -39,6 +41,8 @@ import main
 class Window(QWidget):
     tabWidgets = []
     settings = json.loads(open("settings.json", "r").read())
+    DPISize = None
+    DPIInputs = []
     def closeEvent(self, ev):
         print("Detaching from mouse")
         main.detach_mouse()
@@ -61,12 +65,11 @@ class Window(QWidget):
         if(tabID == 0):
             w = self.geometry().width()
             h = 0 + 110
-             #self.setFixedSize(self.geometry().width(),self.geometry().height() + int(widget.sizeHint().height() + 5))
             for widget in self.tabWidgets:
                 h += int(widget.sizeHint().height() + 5)
             self.setFixedSize(w, h)
         if(tabID == 1):
-            self.setFixedSize(250, 300)
+            self.setFixedSize(self.DPISize.width() + 30, self.DPISize.height() + 50)
     def RGBTab(self):
         print("Attaching to mouse")
         main.attach_mouse()
@@ -95,13 +98,25 @@ class Window(QWidget):
 
     def DPITab(self):
         DPITab = QWidget()
-        layout = QVBoxLayout()
+        layout = QGridLayout()
 
         for i in range(6):
             self.colorPickBtn = QPushButton('DPIColor {}'.format(i +1), self)
+            self.colorPickBtn.setFixedWidth(100)
             self.colorPickBtn.clicked.connect(lambda t, i=i : self.handleDPIColorChange(i + 1))
-            layout.addWidget(self.colorPickBtn)
+            layout.addWidget(self.colorPickBtn,i,0)
+        for i in range(6):
+            self.dpiInput = QLineEdit(str(main.getDPI(main.getMemory(True), i + 1)), self)
+            self.dpiInput.setFixedWidth(100)
+            self.DPIInputs.append(self.dpiInput)
+            layout.addWidget(self.dpiInput,i,1)
+            self.applyBtn = QPushButton('Apply', self)
+            self.applyBtn.clicked.connect(lambda t, i=i : self.handleDPIApply(i + 1))
+            self.applyBtn.setFixedWidth(50)
+            layout.addWidget(self.applyBtn,i,2)
+        
         DPITab.setLayout(layout)
+        self.DPISize = DPITab.sizeHint()
         return DPITab
         
     def macroTabUI(self):
@@ -309,6 +324,11 @@ class Window(QWidget):
         reply = dialog.exec()
         if reply == QDialog.Accepted:
             main.set_color_to_memory(main.getMemory(True), dialog.getColor().name().replace("#", ""), DPI)
+
+    def handleDPIApply(self,DPI):
+        DPINum = int(self.DPIInputs[DPI - 1].text())
+        main.setDpi(main.getMemory(True), DPINum, DPI)
+
 
 
 
