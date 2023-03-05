@@ -52,10 +52,21 @@ class Window(QWidget):
         # Create the tab widget with two tabs
         tabs = QTabWidget()
         tabs.addTab(self.RGBTab(), "RGB")
+        tabs.addTab(self.DPITab(), "DPI")
         tabs.addTab(self.macroTabUI(), "Macro")
+        tabs.currentChanged.connect(self.tabChanged)
         layout.addWidget(tabs)
 
-
+    def tabChanged(self,tabID):
+        if(tabID == 0):
+            w = self.geometry().width()
+            h = 0 + 110
+             #self.setFixedSize(self.geometry().width(),self.geometry().height() + int(widget.sizeHint().height() + 5))
+            for widget in self.tabWidgets:
+                h += int(widget.sizeHint().height() + 5)
+            self.setFixedSize(w, h)
+        if(tabID == 1):
+            self.setFixedSize(250, 300)
     def RGBTab(self):
         print("Attaching to mouse")
         main.attach_mouse()
@@ -81,16 +92,18 @@ class Window(QWidget):
         self.RGBSelectionChanged(0, RGBTab)
         
         return RGBTab
-    def cleanRGBTab(self, RGBTab):
-        for widget in self.tabWidgets:
-            RGBTab.layout().removeWidget(widget)
-            widget.setParent(None)
-        self.tabWidgets = []
-        self.setFixedSize(270, 110)
-    def writeSettings(self):
-        with open("settings.json", "w") as write_file:
-            json.dump(self.settings, write_file)
 
+    def DPITab(self):
+        DPITab = QWidget()
+        layout = QVBoxLayout()
+
+        for i in range(6):
+            self.colorPickBtn = QPushButton('DPIColor {}'.format(i +1), self)
+            self.colorPickBtn.clicked.connect(lambda t, i=i : self.handleDPIColorChange(i + 1))
+            layout.addWidget(self.colorPickBtn)
+        DPITab.setLayout(layout)
+        return DPITab
+        
     def macroTabUI(self):
 
         macroTab = QWidget()
@@ -101,6 +114,17 @@ class Window(QWidget):
         macroTab.setLayout(layout)
         
         return macroTab
+
+    def cleanRGBTab(self, RGBTab):
+        for widget in self.tabWidgets:
+            RGBTab.layout().removeWidget(widget)
+            widget.setParent(None)
+        self.tabWidgets = []
+        self.setFixedSize(270, 110)
+    def writeSettings(self):
+        with open("settings.json", "w") as write_file:
+            json.dump(self.settings, write_file)
+    
     def RGBSelectionChanged(self, selectionIndex, RGBTab):
         self.cleanRGBTab(RGBTab)
         options = {
@@ -116,10 +140,13 @@ class Window(QWidget):
            9 : self.LEDOff,
         }
         options[selectionIndex](RGBTab)
+
     def addTabWidget(self,widget, RGBTab):
         self.setFixedSize(self.geometry().width(),self.geometry().height() + int(widget.sizeHint().height() + 5))
         RGBTab.layout().addWidget(widget,1)
         self.tabWidgets.append(widget)
+
+    # EFFECT FUNCTIONS
     def prismoEffect(self,RGBTab):
         modeID = 1
         label = QLabel("Effect speed:")
@@ -276,6 +303,12 @@ class Window(QWidget):
         main.setPrismoEffectModeDirection(main.getMemory(True), direction)
         self.settings["settings"][1]["direction"] = 'left' if direction == 1 else 'right'
         self.writeSettings()
+
+    def handleDPIColorChange(self, DPI):
+        dialog = ColorPickerDialog()
+        reply = dialog.exec()
+        if reply == QDialog.Accepted:
+            main.set_color_to_memory(main.getMemory(True), dialog.getColor().name().replace("#", ""), DPI)
 
 
 
