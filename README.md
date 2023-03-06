@@ -11,7 +11,6 @@ sudo python3 gui.py
 ## Make sure to run as root! It cannot attach to the mouse without root!
 
 # TODO:
-- Add DPI settings. Only DPI color settings for now.
 - Add mouse parameter settings
 - Add poling rate settings
 - Add macros
