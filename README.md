@@ -3,7 +3,7 @@ This is unofficial software for the Genesis Xenon 770 mouse for GNU/Linux. For n
 
 # How to use:
 ```
-pip install -r requirements.txt
+sudo pip install -r requirements.txt
 ```
 ```
 sudo python3 gui.py
